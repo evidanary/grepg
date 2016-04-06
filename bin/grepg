@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'grepg'
+
+GrepPage::Parser.new(ARGV).run!
