@@ -6,6 +6,7 @@ module GrepPage
       cheats.map do |cheat|
         puts cheat[:description].colorize(:green)
         puts cheat[:command].colorize(:blue).on_black
+        puts
       end
     end
   end

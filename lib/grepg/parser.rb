@@ -4,26 +4,39 @@ require 'trollop'
 module GrepPage
   class Parser
     def initialize(args)
-      @user = args.shift
-      @topic = args.shift
-      @opts = Trollop::options(args) do
+      parser = Trollop::Parser.new do
         opt :search,
           "text to search",
           :type => :string,
           :required => false,
           :short => "-s"
         banner <<-EOS
-Test is an awesome program that does something very, very important.
 
 Usage:
-  test [options] <filenames>+
-  where [options] are:
-EOS
+  grepg user_name topic_name [-s search_term]
+
+Examples:
+  grepg kdavis css
+  greppg kdavis css -s color
+        EOS
       end
+
+      @opts = Trollop::with_standard_exception_handling parser do
+        raise Trollop::HelpNeeded if args.empty? # show help screen
+        parser.parse args
+      end
+
+      leftovers = parser.leftovers
+      @user = leftovers.shift
+      @topic = leftovers.shift
       @search_term = @opts[:search]
     end
 
     def run!
+      headers = ["User: #{@user}", "Topic: #{@topic}"]
+      headers << "Search-Term: #{@search_term}" if @search_term
+
+      puts headers.join(", ")
       topics = GrepPage::API.sheets(@user)
       sheet = topics.select{|topic| topic[:name].downcase == @topic.downcase}.first
       sheet = topics.select{|topic| topic[:name].downcase[@topic.downcase]}.first unless sheet
