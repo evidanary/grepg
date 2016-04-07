@@ -12,7 +12,13 @@ Gem::Specification.new do |s|
   s.summary     = %q{A ruby client to access greppage.com from the commandline}
   s.description = %q{A ruby client to access greppage.com from the commandline}
 
-  s.add_development_dependency "rspec", "~>3.0.0"
+
+  s.add_runtime_dependency 'trollop', '~> 2.1.2'
+  s.add_runtime_dependency 'rest-client', '~> 1.8.0'
+  s.add_runtime_dependency 'colorize', '~> 0.7.7'
+  s.add_development_dependency 'rspec', "~>3.0.0"
+  s.add_development_dependency 'rake', "~>10.1.0"
+  s.add_development_dependency 'webmock', "~>1.21.0"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- spec/*`.split("\n")
