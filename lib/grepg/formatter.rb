@@ -2,6 +2,7 @@ require 'colorize'
 module GrepPage
   class Formatter
     # Displays an array of cheats
+    # TODO: Highlight search term
     def self.cheat_rows(cheats, search_term)
       cheats.map do |cheat|
         puts cheat[:description].colorize(:green)

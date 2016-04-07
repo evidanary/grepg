@@ -38,8 +38,8 @@ Examples:
     end
 
     def filter_topics(topics, topic_name = '')
-      sheet = topics.select{|topic| topic[:name].downcase == topic_name.downcase}.first
-      sheet = topics.select{|topic| topic[:name].downcase[topic_name.downcase]}.first unless sheet
+      sheet = topics.find{|topic| topic[:name].downcase == topic_name.downcase}
+      sheet = topics.find{|topic| topic[:name].downcase[topic_name.downcase]} unless sheet
       sheet
     end
 
@@ -49,8 +49,8 @@ Examples:
 
     def filter_cheats(cheats, search_term)
       cheats.select do |cheat|
-        (cheat[:description].downcase[@search_term.downcase] ||
-         cheat[:command].downcase[@search_term.downcase]) != nil
+        (cheat[:description].downcase[search_term.downcase] ||
+         cheat[:command].downcase[search_term.downcase]) != nil
       end
     end
 
@@ -61,7 +61,7 @@ Examples:
 
       begin
         topics = get_all_topics(@user)
-      rescue RestClient::ResourceNotFound => ex
+      rescue RestClient::ResourceNotFound
         puts "That username does not exist"
         exit 1
       end
@@ -69,7 +69,7 @@ Examples:
       topic = filter_topics(topics, @topic)
       if topic.nil? || topic.empty?
         puts "Can't find that topic. Choose one of the following"
-        puts topics.map{|topic| topic[:name]}
+        puts topics.map{|t| t[:name]}
         exit 1
       end
 
