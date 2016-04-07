@@ -5,7 +5,7 @@ module GrepPage
     def self.cheat_rows(cheats, search_term)
       cheats.map do |cheat|
         puts cheat[:description].colorize(:green)
-        puts cheat[:command].colorize(:blue).on_black
+        puts cheat[:command].colorize(:blue)
         puts
       end
     end

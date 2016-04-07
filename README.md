@@ -8,10 +8,12 @@ To install `grepg`
 ```gem install grepg`
 
 ###Examples
+```grepg user_name topic_name```
+
 Get all items/microdoc for a topic on evidanary's collection.
 ```grepg evidanary unix```
 
-Search across items
+Search within a topic
 ```grepg evidanary unix -g tcpdump```
 
 ##License

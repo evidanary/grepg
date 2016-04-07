@@ -1,4 +1,5 @@
 require 'trollop'
+require 'rest-client'
 
 # This class parses commandline arguments
 module GrepPage
@@ -22,7 +23,7 @@ Examples:
       end
 
       @opts = Trollop::with_standard_exception_handling parser do
-        raise Trollop::HelpNeeded if args.empty? # show help screen
+        raise Trollop::HelpNeeded if args.size < 2 # show help screen
         parser.parse args
       end
 
@@ -32,26 +33,48 @@ Examples:
       @search_term = @opts[:search]
     end
 
+    def get_all_topics(user)
+      GrepPage::API.sheets(user)
+    end
+
+    def filter_topics(topics, topic_name = '')
+      sheet = topics.select{|topic| topic[:name].downcase == topic_name.downcase}.first
+      sheet = topics.select{|topic| topic[:name].downcase[topic_name.downcase]}.first unless sheet
+      sheet
+    end
+
+    def get_cheats(user, sheet_id)
+      GrepPage::API.cheats(user, sheet_id)
+    end
+
+    def filter_cheats(cheats, search_term)
+      cheats.select do |cheat|
+        (cheat[:description].downcase[@search_term.downcase] ||
+         cheat[:command].downcase[@search_term.downcase]) != nil
+      end
+    end
+
     def run!
       headers = ["User: #{@user}", "Topic: #{@topic}"]
       headers << "Search-Term: #{@search_term}" if @search_term
-
       puts headers.join(", ")
-      topics = GrepPage::API.sheets(@user)
-      sheet = topics.select{|topic| topic[:name].downcase == @topic.downcase}.first
-      sheet = topics.select{|topic| topic[:name].downcase[@topic.downcase]}.first unless sheet
-      raise RunTimeException unless sheet
 
-      sheet_id = sheet[:id]
-      cheats = GrepPage::API.cheats(@user, sheet_id)
-      raise RunTimeException unless cheats
-
-      if(@search_term)
-        cheats = cheats.select do |cheat|
-          (cheat[:description].downcase[@search_term.downcase] ||
-           cheat[:command].downcase[@search_term.downcase]) != nil
-        end
+      begin
+        topics = get_all_topics(@user)
+      rescue RestClient::ResourceNotFound => ex
+        puts "That username does not exist"
+        exit 1
       end
+
+      topic = filter_topics(topics, @topic)
+      if topic.nil? || topic.empty?
+        puts "Can't find that topic. Choose one of the following"
+        puts topics.map{|topic| topic[:name]}
+        exit 1
+      end
+
+      cheats = get_cheats(@user, topic[:id])
+      cheats = filter_cheats(cheats, @search_term) if @search_term
 
       GrepPage::Formatter.cheat_rows(cheats, @search_term)
     end
