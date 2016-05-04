@@ -3,10 +3,16 @@ module GrepPage
   class Formatter
     # Displays an array of cheats
     # TODO: Highlight search term
-    def self.cheat_rows(cheats, search_term)
+    def self.cheat_rows(cheats, search_term, colorize)
       cheats.map do |cheat|
-        puts cheat[:description].colorize(:green)
-        puts cheat[:command].colorize(:blue)
+        description = cheat[:description]
+        command = cheat[:command]
+        if colorize
+          description = description.colorize(:green)
+          command = command.colorize(:blue)
+        end
+        puts description
+        puts command
         puts
       end
     end

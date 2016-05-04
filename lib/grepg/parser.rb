@@ -11,6 +11,14 @@ module GrepPage
           :type => :string,
           :required => false,
           :short => "-s"
+        opt :colorize,
+          "colorize output",
+          :type => :boolean,
+          :short => "-c"
+        opt :version,
+          "version number of the gem",
+          :type => :boolean,
+          :short => "-v"
         banner <<-EOS
 
 Usage:
@@ -23,7 +31,7 @@ Examples:
       end
 
       @opts = Trollop::with_standard_exception_handling parser do
-        raise Trollop::HelpNeeded if args.size < 2 # show help screen
+        raise Trollop::HelpNeeded if (args.size < 2 && !args.include?('--version')) # show help screen
         parser.parse args
       end
 
@@ -31,6 +39,8 @@ Examples:
       @user = leftovers.shift
       @topic = leftovers.shift
       @search_term = @opts[:search]
+      @colorize = @opts[:colorize]
+      @version = @opts[:version]
     end
 
     def get_all_topics(user)
@@ -54,29 +64,37 @@ Examples:
       end
     end
 
-    def run!
-      headers = ["User: #{@user}", "Topic: #{@topic}"]
-      headers << "Search-Term: #{@search_term}" if @search_term
+    def process_args(user, topic, search_term, colorize)
+      headers = ["User: #{user}", "Topic: #{topic}"]
+      headers << "Search-Term: #{search_term}" if search_term
       puts headers.join(", ")
 
       begin
-        topics = get_all_topics(@user)
+        topics = get_all_topics(user)
       rescue RestClient::ResourceNotFound
         puts "That username does not exist"
         exit 1
       end
 
-      topic = filter_topics(topics, @topic)
+      topic = filter_topics(topics, topic)
       if topic.nil? || topic.empty?
         puts "Can't find that topic. Choose one of the following"
         puts topics.map{|t| t[:name]}
         exit 1
       end
 
-      cheats = get_cheats(@user, topic[:id])
-      cheats = filter_cheats(cheats, @search_term) if @search_term
+      cheats = get_cheats(user, topic[:id])
+      cheats = filter_cheats(cheats, search_term) if search_term
 
-      GrepPage::Formatter.cheat_rows(cheats, @search_term)
+      GrepPage::Formatter.cheat_rows(cheats, search_term, colorize)
+    end
+
+    def run!
+      if(@version)
+        puts "Version: #{GrepPage::Version}"
+      else
+        process_args(@user, @topic, @search_term, @colorize)
+      end
     end
   end
 end
