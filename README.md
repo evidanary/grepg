@@ -9,13 +9,12 @@ To install `grepg` run ```gem install grepg```
 ###Examples
 ```
 Usage:
-grepg user_name topic_name [-s search_term]
+  grepg -u user_name -t topic_name [-s search_term]
 ```
 
-Get all items/microdoc for a topic on any collection.
-
+Get all items/microdoc for a topic
 ```
-$ grepg kdavis git
+$ grepg -u kdavis -t git
 User: kdavis, Topic: git
 push tags to remote / Github
 git push --tags
@@ -35,7 +34,7 @@ git branch --merged master
 Search for a specific string
 
 ```
-$ grepg kdavis git -s stash
+$ grepg -u kdavis -t git -s stash
 User: kdavis, Topic: git, Search-Term: stash
 TO apply your changes
 git stash --apply
