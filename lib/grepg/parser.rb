@@ -7,11 +7,12 @@ require_relative 'version'
 module GrepPage
   class Parser
     def initialize(args)
+      default_config = self.class.get_default_config
       parser = Trollop::Parser.new do
         opt :user,
           "username",
           :type => :string,
-          :default => GrepPage::Parser.get_default('default_user'),
+          :default => default_config['user'],
           :short => "-u"
         opt :topic,
           "topic",
@@ -26,6 +27,7 @@ module GrepPage
         opt :colorize,
           "colorize output",
           :type => :boolean,
+          :default => default_config['colorize'],
           :short => "-c"
         version "grepg version #{GrepPage::VERSION}"
         banner <<-EOS
@@ -34,11 +36,13 @@ Usage:
   grepg -u user_name -t topic_name [-s search_term]
 
 Examples:
-  grepg kdavis css
-  greppg kdavis css -s color
+  grepg -u evidanary -t css
+  greppg -u evidanary -t css -s color
+
 Defaults:
-  To set default user, create a file in ~/.grepg.yml with
-  default_user: test
+  To set defaults, create a file in ~/.grepg.yml with
+  user: test
+  colorize: true
         EOS
       end
 
@@ -52,9 +56,9 @@ Defaults:
       @colorize = @opts[:colorize]
     end
 
-    def self.get_default(param)
+    def self.get_default_config
       file = self.default_file_name
-      file ? YAML.load(IO.read(file))[param] : nil
+      file ? YAML.load(IO.read(file)) : {}
     end
 
     def self.default_file_name

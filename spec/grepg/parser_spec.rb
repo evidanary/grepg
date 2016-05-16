@@ -29,7 +29,7 @@ describe GrepPage::Parser do
       it "reads username from the defaults file" do
         expect(File).to receive(:exist?).and_return(true)
         expect(IO).to receive(:read).with(ENV['HOME'] + '/.grepg.yml').and_return({
-          "default_user" => "kdavis"
+          "user" => "kdavis"
         }.to_yaml)
         parser = GrepPage::Parser.new('-t css'.split(' '))
         expect(parser.instance_variable_get(:@opts)[:user]).to eq('kdavis')
@@ -49,18 +49,19 @@ describe GrepPage::Parser do
     end
   end
 
-  describe '#get_default' do
-    it('returns nil if ~/.grepg.yml doesnt exist') do
+  describe '#get_default_config' do
+    it('returns empty hash if ~/.grepg.yml doesnt exist') do
       expect(File).to receive(:exist?).and_return(false)
-      expect(GrepPage::Parser.get_default('default_user')).to eq(nil)
+      expect(GrepPage::Parser.get_default_config).to eq({})
     end
 
     it('returns parses YML if ~/.grepg.yml exists') do
+      default_contents = {
+        "user" => "test"
+      }
       expect(File).to receive(:exist?).and_return(true)
-      expect(IO).to receive(:read).and_return({
-        "default_user" => "test"
-      }.to_yaml)
-      expect(GrepPage::Parser.get_default("default_user")).to eq("test")
+      expect(IO).to receive(:read).and_return(default_contents.to_yaml)
+      expect(GrepPage::Parser.get_default_config).to eq(default_contents)
     end
   end
 end
