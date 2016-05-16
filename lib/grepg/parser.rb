@@ -1,6 +1,7 @@
 require 'trollop'
 require 'rest-client'
 require 'yaml'
+require_relative 'version'
 
 # This class parses commandline arguments
 module GrepPage
@@ -26,10 +27,7 @@ module GrepPage
           "colorize output",
           :type => :boolean,
           :short => "-c"
-        opt :version,
-          "version number of the gem",
-          :type => :boolean,
-          :short => "-v"
+        version "grepg version #{GrepPage::VERSION}"
         banner <<-EOS
 
 Usage:
@@ -52,7 +50,6 @@ Defaults:
       @topic = @opts[:topic]
       @search_term = @opts[:search]
       @colorize = @opts[:colorize]
-      @version = @opts[:version]
     end
 
     def self.get_default(param)
@@ -95,14 +92,14 @@ Defaults:
         topics = get_all_topics(user)
       rescue RestClient::ResourceNotFound
         puts "That username does not exist"
-        exit 1
+        raise "Unable to find user"
       end
 
       topic = filter_topics(topics, topic)
       if topic.nil? || topic.empty?
         puts "Can't find that topic. Choose one of the following"
         puts topics.map{|t| t[:name]}
-        exit 1
+        raise "Unable to find topic"
       end
 
       cheats = get_cheats(user, topic[:id])
@@ -112,11 +109,7 @@ Defaults:
     end
 
     def run!
-      if(@version)
-        puts "Version: #{GrepPage::Version}"
-      else
-        process_args(@user, @topic, @search_term, @colorize)
-      end
+      process_args(@user, @topic, @search_term, @colorize)
     end
   end
 end
