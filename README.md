@@ -11,7 +11,7 @@ gem install grepg
 ```
 
 #Requirements
-- ruby (works with ruby 2.2.4 - I haven't tested with older versions)
+- ruby (tested on 2.1.2)
 
 
 #Usage
