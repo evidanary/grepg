@@ -3,8 +3,10 @@ grepg
 
 `grepg` (pronounced Grep G) is a ruby client for [GrepPage](https://www.greppage.com).  It allows you to access your cheat sheets without leaving the terminal.
 
+![grepg screenshot](https://github.com/evidanary/grepg/raw/master/img/screenshot.png)
+
 #Installation
-To install `grepg` run 
+To install `grepg` run
 
 ```
 gem install grepg
