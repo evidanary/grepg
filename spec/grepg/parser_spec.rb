@@ -34,6 +34,17 @@ describe GrepPage::Parser do
         parser = GrepPage::Parser.new('-t css'.split(' '))
         expect(parser.instance_variable_get(:@opts)[:user]).to eq('kdavis')
       end
+
+      # Test if we get an error when no user is specified. We should tell the user
+      # a sample username they can use if they want to try the client out without
+      # creating an account
+      it "errors when no user is specified" do
+        expect(File).to receive(:exist?).and_return(false)
+        expect do
+          output = GrepPage::Parser.new('-t css'.split(' '))
+          expect(output).to match(/Missing --user parameter.*--user.*"/)
+        end.to raise_error(SystemExit)
+      end
     end
   end
 

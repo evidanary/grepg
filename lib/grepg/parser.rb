@@ -47,7 +47,12 @@ Defaults:
       end
 
       @opts = Trollop::with_standard_exception_handling parser do
-        parser.parse args
+        opts = parser.parse args
+        # User is a required field, manually handling validation because
+        # we fallback on defaults from the file
+        raise Trollop::CommandlineError,
+          "Missing --user parameter. e.g. --user evidanary" unless opts[:user]
+        opts
       end
 
       @user = @opts[:user]
