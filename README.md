@@ -39,7 +39,7 @@ Examples:
 
 Defaults:
   To set default user, create a file in ~/.grepg.yml with
-  default_user: test
+  user: test
 ```
 
 
