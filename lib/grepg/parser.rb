@@ -1,7 +1,6 @@
 require 'trollop'
 require 'rest-client'
 require 'yaml'
-require_relative 'version'
 
 # This class parses commandline arguments
 module GrepPage
@@ -100,15 +99,14 @@ Defaults:
       begin
         topics = get_all_topics(user)
       rescue RestClient::ResourceNotFound
-        puts "That username does not exist"
-        raise "Unable to find user"
+        raise GrepPage::NotFoundError, "Unable to find user"
       end
 
       topic = filter_topics(topics, topic)
       if topic.nil? || topic.empty?
         puts "Can't find that topic. Choose one of the following"
         puts topics.map{|t| t[:name]}
-        raise "Unable to find topic"
+        raise GrepPage::NotFoundError, "Unable to find topic"
       end
 
       cheats = get_cheats(user, topic[:id])
@@ -118,7 +116,11 @@ Defaults:
     end
 
     def run!
-      process_args(@user, @topic, @search_term, @colorize)
+      begin
+        process_args(@user, @topic, @search_term, @colorize)
+      rescue GrepPage::NotFoundError => ex
+        abort "Error: #{ex.message}"
+      end
     end
   end
 end
