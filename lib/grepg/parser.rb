@@ -23,6 +23,11 @@ module GrepPage
           :type => :string,
           :required => false,
           :short => "-s"
+        opt :search_operator,
+          "One of: OR, AND",
+          :type => :string,
+          :default => default_config['search_operator'],
+          :short => "-o"
         opt :colorize,
           "colorize output",
           :type => :boolean,
@@ -57,6 +62,8 @@ Defaults:
       @user = @opts[:user]
       @topic = @opts[:topic]
       @search_term = @opts[:search]
+      @search_operator = (@opts[:search_operator] || "and")
+        .upcase.to_sym
       @colorize = @opts[:colorize]
     end
 
@@ -84,48 +91,56 @@ Defaults:
       GrepPage::API.cheats(user, sheet_id)
     end
 
-    def filter_cheats(cheats, search_term)
+    def filter_cheats(cheats, search_term, search_operator)
       cheats.select do |cheat|
-        (cheat[:description].downcase[search_term.downcase] ||
-         cheat[:command].downcase[search_term.downcase]) != nil
+        search_term.split(' ').map do |token|
+          text_to_search = [ cheat[:description],
+                             cheat[:command]
+          ].join(' ').downcase
+          text_to_search.include? token.downcase
+        end.reduce {|a,b| search_operator == :AND ? a && b : a || b}
       end
     end
 
-    def process_args(user, topic, search_term, colorize)
-      headers = ["User: #{user}"]
-      headers << "Topic: #{topic}" if topic
-      headers << "Search-Term: #{search_term}" if search_term
+    def process_args
+      headers = ["User: #{@user}"]
+      headers << "Topic: #{@topic}" if @topic
+      if(@search_term)
+        label = "Search-Term: #{@search_term}"
+        label += "(#{@search_operator})" if @search_term.split(' ').count > 1
+        headers << label
+      end
       puts headers.join(", ")
 
       begin
-        topics = get_all_topics(user)
+        topics = get_all_topics(@user)
       rescue RestClient::ResourceNotFound
         raise GrepPage::NotFoundError, "Unable to find user"
       end
 
-      unless topic
+      unless @topic
         # No topic specified so show all topics
         puts "Available Topics => "
         puts topics.map{|t| t[:name]}
         return
       end
 
-      topic = filter_topics(topics, topic)
+      topic = filter_topics(topics, @topic)
       if topic.nil? || topic.empty?
         puts "Can't find that topic. Choose one of the following"
         puts topics.map{|t| t[:name]}
         raise GrepPage::NotFoundError, "Unable to find topic"
       end
 
-      cheats = get_cheats(user, topic[:id])
-      cheats = filter_cheats(cheats, search_term) if search_term
+      cheats = get_cheats(@user, topic[:id])
+      cheats = filter_cheats(cheats, @search_term, @search_operator) if @search_term
 
-      GrepPage::Formatter.cheat_rows(cheats, search_term, colorize)
+      GrepPage::Formatter.cheat_rows(cheats, @search_term, @colorize)
     end
 
     def run!
       begin
-        process_args(@user, @topic, @search_term, @colorize)
+        process_args
       rescue GrepPage::NotFoundError => ex
         abort "Error: #{ex.message}"
       end

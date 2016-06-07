@@ -2,19 +2,31 @@ require 'json'
 require 'yaml'
 require_relative '../../lib/grepg.rb'
 
+# Integration level tests
 describe GrepPage::Parser do
   describe '.initialize' do
     context "expected behavior" do
       it "returns a set of cheats when username and topic are given" do
         parser = GrepPage::Parser.new('-u kdavis -t css'.split(' '))
         output = capture_stdout { parser.run! }
-        expect(output).to match(/colors/)
+        expect(output).to match(/palette/)
       end
 
       it "returns a set of cheats when username, topic and search term are given" do
         parser = GrepPage::Parser.new('-u kdavis -t css -s colors'.split(' '))
         output = capture_stdout { parser.run! }
-        expect(output).to match(/colors/)
+        expect(output).to match(/palette/)
+      end
+
+      it "returns a set of cheats search term has multiple words" do
+        args = '-u kdavis -t css -o AND -s'.split(' ')
+        parser = GrepPage::Parser.new(args << "colors asbd")
+        output = capture_stdout { parser.run! }
+        expect(output).not_to match(/palette/)
+        args = '-u kdavis -t css -o OR -s'.split(' ')
+        expect(capture_stdout {
+          GrepPage::Parser.new(args << "colors asbd").run!
+        }).to match(/palette/)
       end
 
       # Test if we are seeing colors in the output
@@ -79,6 +91,28 @@ describe GrepPage::Parser do
       expect(File).to receive(:exist?).and_return(true)
       expect(IO).to receive(:read).and_return(default_contents.to_yaml)
       expect(GrepPage::Parser.get_default_config).to eq(default_contents)
+    end
+  end
+
+  describe '#filter_cheats' do
+    let ( :parser ) { GrepPage::Parser.new('-u kdavis'.split(' ')) }
+    let ( :cheats ) {[{
+      description: "bootstrap styles $@ 123",
+      command: "command for bootstrap styles"
+    }]}
+
+    it('filters cheats based on search term') do
+      expect(parser.filter_cheats(cheats, 'boot style', :AND).count).to be > 0
+      expect(parser.filter_cheats(cheats, 'boot', :AND).count).to be > 0
+      # test special characters
+      expect(parser.filter_cheats(cheats, '$@', :AND).count).to be > 0
+    end
+
+    it('processes AND and OR for queries') do
+      # process OR
+      expect(parser.filter_cheats(cheats, 'boot garbage', :OR).count).to be > 0
+      # process AND
+      expect(parser.filter_cheats(cheats, 'boot garbage', :AND).count).to be 0
     end
   end
 end
