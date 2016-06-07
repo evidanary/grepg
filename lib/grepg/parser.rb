@@ -16,7 +16,7 @@ module GrepPage
         opt :topic,
           "topic",
           :type => :string,
-          :required => true,
+          :required => false,
           :short => "-t"
         opt :search,
           "text to search",
@@ -32,7 +32,7 @@ module GrepPage
         banner <<-EOS
 
 Usage:
-  grepg -u user_name -t topic_name [-s search_term]
+  grepg -u user_name [-t topic_name -s search_term]
 
 Examples:
   grepg -u evidanary -t css
@@ -92,7 +92,8 @@ Defaults:
     end
 
     def process_args(user, topic, search_term, colorize)
-      headers = ["User: #{user}", "Topic: #{topic}"]
+      headers = ["User: #{user}"]
+      headers << "Topic: #{topic}" if topic
       headers << "Search-Term: #{search_term}" if search_term
       puts headers.join(", ")
 
@@ -100,6 +101,13 @@ Defaults:
         topics = get_all_topics(user)
       rescue RestClient::ResourceNotFound
         raise GrepPage::NotFoundError, "Unable to find user"
+      end
+
+      unless topic
+        # No topic specified so show all topics
+        puts "Available Topics => "
+        puts topics.map{|t| t[:name]}
+        return
       end
 
       topic = filter_topics(topics, topic)

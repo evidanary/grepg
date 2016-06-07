@@ -45,6 +45,12 @@ describe GrepPage::Parser do
           expect(output).to match(/Missing --user parameter.*--user.*"/)
         end.to raise_error(SystemExit)
       end
+
+      it "shows all topics when no topic filter is specified" do
+        parser = GrepPage::Parser.new('-u kdavis'.split(' '))
+        output = capture_stdout { parser.run! }
+        expect(output).to match(/UNIX/)
+      end
     end
   end
 

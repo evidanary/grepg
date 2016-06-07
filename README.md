@@ -23,17 +23,18 @@ Enter user and topic name followed by an optional search string.
 ```
 $ grepg --help
 Usage:
-  grepg -u user_name -t topic_name [-s search_term]
+  grepg -u user_name [-t topic_name -s search_term]
 
 Options:
   -u, --user=<s>                   username
   -t, --topic=<s>                  topic
   -s, --search=<s>                 text to search
-  -c, --colorize    colorize output (default: true)
+  -c, --colorize                   colorize output
   -v, --version                    Print version and exit
   -h, --help                       Show this message
 
 Examples:
+  grepg -u evidanary
   grepg -u evidanary -t css
   greppg -u evidanary -t css -s color
 
@@ -43,11 +44,23 @@ Defaults:
 ```
 
 
+To list all topics for a user
+
+```
+$ grepg -u kdavis
+User: kdavis
+Available Topics =>
+CSS
+ES6
+...
+
+```
+
 For example, to get all cheats for the `git` topic for user `kdavis`
 
 ```
-$ grepg -u evidanary -t git
-User: evidanary, Topic: git
+$ grepg -u kdavis -t git
+User: kdavis, Topic: git
 push tags to remote / Github
 git push --tags
 
