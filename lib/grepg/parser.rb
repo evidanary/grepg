@@ -62,9 +62,8 @@ Defaults:
       @user = @opts[:user]
       @topic = @opts[:topic]
       @search_term = @opts[:search]
-      @search_operator = (@opts[:search_operator] || "and")
-        .upcase.to_sym
-      @colorize = @opts[:colorize]
+      @search_operator = (@opts[:search_operator] || "and").upcase.to_sym
+      @colorize = @opts[:colorize] || true
     end
 
     def self.get_default_config
