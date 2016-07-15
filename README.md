@@ -99,5 +99,8 @@ User: evidanary, Topic: bootstrap
 #Development
 To execute tests run ```bundle exec rake spec```. To install the gem locally, first build it using ```bundle exec rake build```. Then install the gem ```gem install pkg/grepg-0.0.1.gem```
 
+#Related Projects
+[Python Client](https://github.com/tejal29/grepg)
+
 #License
 grepg is under the [MIT License](http://www.opensource.org/licenses/MIT).
