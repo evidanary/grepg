@@ -37,6 +37,12 @@ describe GrepPage::Parser do
         expect(output.inspect).to include("\\e[0;34;49m")
       end
 
+      it "does not colorize output of the result" do
+        parser = GrepPage::Parser.new('-u kdavis -t css --no-colorize'.split(' '))
+        output = capture_stdout { parser.run! }
+        expect(output.inspect).not_to include("\\e[0;34;49m")
+      end
+
       # Test if defaut file gets read
       it "reads username from the defaults file" do
         expect(File).to receive(:exist?).and_return(true)
